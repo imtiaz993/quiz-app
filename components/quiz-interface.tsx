@@ -131,7 +131,12 @@ export function QuizInterface({ userInfo, onComplete }: QuizInterfaceProps) {
         .insert({
           user_name: userInfo.name,
           user_email: userInfo.email,
-          user_info: userInfo.additionalInfo ? { additionalInfo: userInfo.additionalInfo } : null,
+          user_info: {
+            currentSalary: userInfo.currentSalary,
+            expectedSalary: userInfo.expectedSalary,
+            reasonForLeaving: userInfo.reasonForLeaving,
+            additionalInfo: userInfo.additionalInfo || null,
+          },
           variant: selectedVariant,
           total_questions: selectedQuestions.length,
         })
@@ -188,6 +193,12 @@ export function QuizInterface({ userInfo, onComplete }: QuizInterfaceProps) {
     const correctAnswer = question.correct_answer.toLowerCase().trim()
     const answer = userAnswer.toLowerCase().trim()
 
+    console.log("[v0] Checking answer:", {
+      questionType: question.question_type,
+      userAnswer: answer,
+      correctAnswer: correctAnswer,
+    })
+
     if (question.question_type === "mcq") {
       return answer === correctAnswer
     } else if (question.question_type === "fill_blank") {
@@ -201,15 +212,28 @@ export function QuizInterface({ userInfo, onComplete }: QuizInterfaceProps) {
     try {
       const supabase = createClient()
 
-      const { data: answersData } = await supabase.from("user_answers").select("is_correct").eq("attempt_id", attemptId)
+      const { data: answersData } = await supabase
+        .from("user_answers")
+        .select(`
+          is_correct,
+          questions!inner(question_type)
+        `)
+        .eq("attempt_id", attemptId)
 
       const totalScore = answersData?.filter((answer) => answer.is_correct).length || 0
+
+      const mcqAnswers = answersData?.filter((answer) => answer.questions.question_type === "mcq") || []
+      const mcqCorrect = mcqAnswers.filter((answer) => answer.is_correct).length
+      const totalMcqs = mcqAnswers.length
+      const textualQuestions = questions.filter((q) => q.question_type !== "mcq").length
 
       await supabase
         .from("quiz_attempts")
         .update({
           completed_at: new Date().toISOString(),
           total_score: totalScore,
+          mcq_score: mcqCorrect,
+          total_mcqs: totalMcqs,
         })
         .eq("id", attemptId)
 
@@ -219,6 +243,9 @@ export function QuizInterface({ userInfo, onComplete }: QuizInterfaceProps) {
         totalScore,
         totalQuestions: questions.length,
         completedAt: new Date().toISOString(),
+        mcqScore: mcqCorrect,
+        totalMcqs: totalMcqs,
+        textualQuestions,
       })
     } catch (error) {
       console.error("Error finishing quiz:", error)

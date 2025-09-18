@@ -8,7 +8,9 @@ import { QuizResults } from "@/components/quiz-results"
 export type UserInfo = {
   name: string
   email: string
-  additionalInfo?: string
+  currentSalary: string
+  expectedSalary: string
+  reasonForLeaving: string
 }
 
 export type QuizAttempt = {
@@ -17,6 +19,9 @@ export type QuizAttempt = {
   totalScore: number
   totalQuestions: number
   completedAt: string
+  mcqScore?: number
+  totalMcqs?: number
+  textualQuestions?: number
 }
 
 export default function QuizPage() {
@@ -44,7 +49,7 @@ export default function QuizPage() {
     <div className="min-h-screen bg-background">
       {currentStep === "registration" && <UserRegistration onComplete={handleRegistrationComplete} />}
 
-      {currentStep === "quiz"&& userInfo && <QuizInterface userInfo={userInfo} onComplete={handleQuizComplete} />}
+      {currentStep === "quiz" && userInfo && <QuizInterface userInfo={userInfo} onComplete={handleQuizComplete} />}
 
       {currentStep === "results" && quizAttempt && userInfo && (
         <QuizResults attempt={quizAttempt} userInfo={userInfo} onStartNewQuiz={handleStartNewQuiz} />

@@ -19,7 +19,9 @@ export function UserRegistration({ onComplete }: UserRegistrationProps) {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    additionalInfo: "",
+    currentSalary: "",
+    expectedSalary: "",
+    reasonForLeaving: "",
   })
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -35,6 +37,18 @@ export function UserRegistration({ onComplete }: UserRegistrationProps) {
       newErrors.email = "Email is required"
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "Please enter a valid email address"
+    }
+
+    if (!formData.currentSalary.trim()) {
+      newErrors.currentSalary = "Current/Previous salary is required"
+    }
+
+    if (!formData.expectedSalary.trim()) {
+      newErrors.expectedSalary = "Expected salary is required"
+    }
+
+    if (!formData.reasonForLeaving.trim()) {
+      newErrors.reasonForLeaving = "Reason for switching/leaving is required"
     }
 
     setErrors(newErrors)
@@ -54,7 +68,9 @@ export function UserRegistration({ onComplete }: UserRegistrationProps) {
     onComplete({
       name: formData.name.trim(),
       email: formData.email.trim(),
-      additionalInfo: formData.additionalInfo.trim() || undefined,
+      currentSalary: formData.currentSalary.trim(),
+      expectedSalary: formData.expectedSalary.trim(),
+      reasonForLeaving: formData.reasonForLeaving.trim(),
     })
 
     setIsLoading(false)
@@ -65,14 +81,14 @@ export function UserRegistration({ onComplete }: UserRegistrationProps) {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <BookOpen className="h-12 w-12 text-primary mx-auto mb-4" />
-          <h1 className="text-3xl font-bold text-foreground mb-2">Welcome to QuizMaster</h1>
-          <p className="text-muted-foreground">Please provide your information to begin the quiz</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Welcome to Codexiom</h1>
+          <p className="text-muted-foreground">Please provide your information to begin the test</p>
         </div>
 
         <Card>
           <CardHeader>
             <CardTitle>Registration</CardTitle>
-            <CardDescription>We need some basic information before you start the quiz</CardDescription>
+            <CardDescription>We need some basic information before you start the test</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -103,18 +119,47 @@ export function UserRegistration({ onComplete }: UserRegistrationProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="additionalInfo">Additional Information (Optional)</Label>
-                <Textarea
-                  id="additionalInfo"
-                  placeholder="Any additional information you'd like to share..."
-                  value={formData.additionalInfo}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, additionalInfo: e.target.value }))}
-                  rows={3}
+                <Label htmlFor="currentSalary">Current/Previous Salary *</Label>
+                <Input
+                  id="currentSalary"
+                  type="text"
+                  placeholder="Enter your current or previous salary"
+                  value={formData.currentSalary}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, currentSalary: e.target.value }))}
+                  className={errors.currentSalary ? "border-destructive" : ""}
                 />
+                <p className="text-xs text-muted-foreground">Slip will be required at the time of joining</p>
+                {errors.currentSalary && <p className="text-sm text-destructive">{errors.currentSalary}</p>}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="expectedSalary">Expected Salary *</Label>
+                <Input
+                  id="expectedSalary"
+                  type="text"
+                  placeholder="Enter your expected salary"
+                  value={formData.expectedSalary}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, expectedSalary: e.target.value }))}
+                  className={errors.expectedSalary ? "border-destructive" : ""}
+                />
+                {errors.expectedSalary && <p className="text-sm text-destructive">{errors.expectedSalary}</p>}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="reasonForLeaving">Reason for Switching/Leaving Last Job *</Label>
+                <Textarea
+                  id="reasonForLeaving"
+                  placeholder="Please explain your reason for switching or leaving your last job..."
+                  value={formData.reasonForLeaving}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, reasonForLeaving: e.target.value }))}
+                  rows={3}
+                  className={errors.reasonForLeaving ? "border-destructive" : ""}
+                />
+                {errors.reasonForLeaving && <p className="text-sm text-destructive">{errors.reasonForLeaving}</p>}
               </div>
 
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Starting Quiz..." : "Start Quiz"}
+                {isLoading ? "Starting Test..." : "Start Test"}
               </Button>
             </form>
           </CardContent>

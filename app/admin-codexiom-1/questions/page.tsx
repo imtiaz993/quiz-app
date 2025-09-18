@@ -55,10 +55,12 @@ export default function QuestionsPage() {
   const [jsonInput, setJsonInput] = useState("")
   const [isUploading, setIsUploading] = useState(false)
   const [showJsonDialog, setShowJsonDialog] = useState(false)
+  const [availableSkills, setAvailableSkills] = useState<{ id: string; name: string }[]>([])
   const { toast } = useToast()
 
   useEffect(() => {
     loadQuestions()
+    loadSkills()
   }, [])
 
   useEffect(() => {
@@ -89,6 +91,18 @@ export default function QuestionsPage() {
       console.error("Error loading questions:", error)
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const loadSkills = async () => {
+    try {
+      const supabase = createClient()
+      const { data, error } = await supabase.from("skills").select("id, name").order("name")
+
+      if (error) throw error
+      setAvailableSkills(data || [])
+    } catch (error) {
+      console.error("Error loading skills:", error)
     }
   }
 
@@ -150,8 +164,54 @@ export default function QuestionsPage() {
         throw new Error("JSON must be an array of questions")
       }
 
+      const validSkillIds = new Set(availableSkills.map((skill) => skill.id))
+      const invalidQuestions = questionsData.filter((q) => !validSkillIds.has(q.skill_id))
+
+      if (invalidQuestions.length > 0) {
+        throw new Error(
+          `Invalid skill_id found. Please use one of the available skill IDs: ${availableSkills.map((s) => `${s.name} (${s.id})`).join(", ")}`,
+        )
+      }
+
+      const processedQuestions = questionsData.map((question) => {
+        if (question.question_type === "mcq" && Array.isArray(question.options)) {
+          // Convert array to object with keys a, b, c, d
+          const optionsObject: Record<string, string> = {}
+          const keys = ["a", "b", "c", "d", "e", "f"] // Support up to 6 options
+
+          question.options.forEach((option: string, index: number) => {
+            if (index < keys.length) {
+              optionsObject[keys[index]] = option
+            }
+          })
+
+          // Find the correct answer key based on the answer text
+          let correctAnswerKey = ""
+          for (const [key, value] of Object.entries(optionsObject)) {
+            if (value.toLowerCase().trim() === question.correct_answer.toLowerCase().trim()) {
+              correctAnswerKey = key
+              break
+            }
+          }
+
+          if (!correctAnswerKey) {
+            throw new Error(
+              `Correct answer "${question.correct_answer}" not found in options for question: "${question.question_text}"`,
+            )
+          }
+
+          return {
+            ...question,
+            options: optionsObject,
+            correct_answer: correctAnswerKey,
+          }
+        }
+
+        return question
+      })
+
       const supabase = createClient()
-      const { data, error } = await supabase.from("questions").insert(questionsData).select()
+      const { data, error } = await supabase.from("questions").insert(processedQuestions).select()
 
       if (error) throw error
 
@@ -176,9 +236,11 @@ export default function QuestionsPage() {
   }
 
   const copyJsonFormat = () => {
+    const sampleSkillId = availableSkills.length > 0 ? availableSkills[0].id : "550e8400-e29b-41d4-a716-446655440000"
+
     const sampleFormat = [
       {
-        skill_id: 1, // Use skill ID from skills table
+        skill_id: sampleSkillId,
         question_text: "Which of the following is not a JavaScript data type?",
         question_type: "mcq",
         options: ["Boolean", "Undefined", "Float", "Symbol"],
@@ -188,7 +250,7 @@ export default function QuestionsPage() {
         variant: 1,
       },
       {
-        skill_id: 2,
+        skill_id: sampleSkillId,
         question_text: "The _______ keyword is used to import functions or components from another file in ES6.",
         question_type: "fill_blank",
         options: [],
@@ -197,7 +259,7 @@ export default function QuestionsPage() {
         variant: 1,
       },
       {
-        skill_id: 1,
+        skill_id: sampleSkillId,
         question_text: "What is the difference between == and === in JavaScript?",
         question_type: "short_answer",
         options: [],
@@ -211,7 +273,7 @@ export default function QuestionsPage() {
     navigator.clipboard.writeText(JSON.stringify(sampleFormat, null, 2))
     toast({
       title: "Copied!",
-      description: "JSON format copied to clipboard. Note: Use skill_id from skills table, not skill name.",
+      description: `JSON format copied to clipboard. Available skills: ${availableSkills.map((s) => `${s.name} (${s.id})`).join(", ")}`,
     })
   }
 
@@ -280,10 +342,22 @@ export default function QuestionsPage() {
                     <DialogTitle>Upload Questions via JSON</DialogTitle>
                     <DialogDescription>
                       Upload multiple questions at once using JSON format. Click "Copy Format" to get the correct
-                      structure.
+                      structure with valid skill IDs.
                     </DialogDescription>
                   </DialogHeader>
                   <div className="space-y-4">
+                    {availableSkills.length > 0 && (
+                      <div className="p-3 bg-muted rounded-lg">
+                        <p className="text-sm font-medium mb-2">Available Skills:</p>
+                        <div className="grid grid-cols-1 gap-1 text-xs">
+                          {availableSkills.map((skill) => (
+                            <div key={skill.id} className="font-mono">
+                              {skill.name}: <span className="text-muted-foreground">{skill.id}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                     <div className="flex justify-end">
                       <Button variant="outline" size="sm" onClick={copyJsonFormat}>
                         <Copy className="h-4 w-4 mr-2" />

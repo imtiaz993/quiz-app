@@ -131,7 +131,7 @@ export default function ResultsPage() {
                 Back to Dashboard
               </Button>
             </Link>
-            <h1 className="text-2xl font-bold text-foreground">Quiz Results</h1>
+            <h1 className="text-2xl font-bold text-foreground">Test Results</h1>
           </div>
         </div>
       </header>
@@ -236,7 +236,7 @@ export default function ResultsPage() {
               <CardContent className="pt-6">
                 <div className="text-center">
                   <p className="text-muted-foreground">
-                    {attempts.length === 0 ? "No quiz attempts found." : "No attempts match your filters."}
+                    {attempts.length === 0 ? "No test attempts found." : "No attempts match your filters."}
                   </p>
                 </div>
               </CardContent>
@@ -269,14 +269,12 @@ export default function ResultsPage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      {attempt.completed_at && (
-                        <Link href={`/admin-codexiom-1/results/${attempt.id}`}>
-                          <Button variant="outline" size="sm">
-                            <Eye className="h-4 w-4 mr-2" />
-                            View Details
-                          </Button>
-                        </Link>
-                      )}
+                      <Link href={`/admin-codexiom-1/results/${attempt.id}`}>
+                        <Button variant="outline" size="sm">
+                          <Eye className="h-4 w-4 mr-2" />
+                          View Details
+                        </Button>
+                      </Link>
                     </div>
                   </div>
                 </CardHeader>
@@ -287,7 +285,7 @@ export default function ResultsPage() {
 
         {/* Summary */}
         <div className="mt-8 text-center text-sm text-muted-foreground">
-          Showing {filteredAttempts.length} of {attempts.length} quiz attempts
+          Showing {filteredAttempts.length} of {attempts.length} test attempts
         </div>
       </main>
     </div>

@@ -174,7 +174,7 @@ export default function ResultDetailPage({ params }: { params: Promise<{ id: str
                 Back to Results
               </Button>
             </Link>
-            <h1 className="text-2xl font-bold text-foreground">Quiz Attempt Details</h1>
+            <h1 className="text-2xl font-bold text-foreground">Test Attempt Details</h1>
           </div>
         </div>
       </header>
@@ -202,6 +202,11 @@ export default function ResultDetailPage({ params }: { params: Promise<{ id: str
                       Completed: {new Date(attempt.completed_at).toLocaleString()}
                     </div>
                   )}
+                  {!attempt.completed_at && (
+                    <div className="flex items-center gap-1">
+                      <Badge variant="secondary">In Progress</Badge>
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="text-right">
@@ -210,18 +215,46 @@ export default function ResultDetailPage({ params }: { params: Promise<{ id: str
                 </Badge>
                 <div className="flex items-center gap-2">
                   <Target className="h-4 w-4 text-muted-foreground" />
-                  <Badge variant={getScoreBadgeVariant(attempt.total_score, attempt.total_questions)}>
-                    {percentage}% ({attempt.total_score}/{attempt.total_questions})
-                  </Badge>
+                  {attempt.completed_at ? (
+                    <Badge variant={getScoreBadgeVariant(attempt.total_score, attempt.total_questions)}>
+                      {percentage}% ({attempt.total_score}/{attempt.total_questions})
+                    </Badge>
+                  ) : (
+                    <Badge variant="secondary">
+                      In Progress ({attempt.total_score}/{attempt.total_questions} answered)
+                    </Badge>
+                  )}
                 </div>
               </div>
             </div>
           </CardHeader>
-          {attempt.user_info?.additionalInfo && (
+          {attempt.user_info && (
             <CardContent>
-              <div>
-                <h4 className="font-medium text-sm text-muted-foreground mb-2">Additional Information:</h4>
-                <p className="text-sm">{attempt.user_info.additionalInfo}</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {attempt.user_info.currentSalary && (
+                  <div>
+                    <h4 className="font-medium text-sm text-muted-foreground mb-1">Current/Previous Salary:</h4>
+                    <p className="text-sm">{attempt.user_info.currentSalary}</p>
+                  </div>
+                )}
+                {attempt.user_info.expectedSalary && (
+                  <div>
+                    <h4 className="font-medium text-sm text-muted-foreground mb-1">Expected Salary:</h4>
+                    <p className="text-sm">{attempt.user_info.expectedSalary}</p>
+                  </div>
+                )}
+                {attempt.user_info.reasonForLeaving && (
+                  <div className="md:col-span-2">
+                    <h4 className="font-medium text-sm text-muted-foreground mb-1">Reason for Switching/Leaving:</h4>
+                    <p className="text-sm">{attempt.user_info.reasonForLeaving}</p>
+                  </div>
+                )}
+                {attempt.user_info.additionalInfo && (
+                  <div className="md:col-span-2">
+                    <h4 className="font-medium text-sm text-muted-foreground mb-1">Additional Information:</h4>
+                    <p className="text-sm">{attempt.user_info.additionalInfo}</p>
+                  </div>
+                )}
               </div>
             </CardContent>
           )}
@@ -229,89 +262,101 @@ export default function ResultDetailPage({ params }: { params: Promise<{ id: str
 
         {/* Detailed Answers */}
         <div className="space-y-6">
-          <h2 className="text-xl font-semibold text-foreground">Question-by-Question Review</h2>
-          {userAnswers.map((answer, index) => (
-            <Card
-              key={answer.id}
-              className={`border-l-4 ${answer.is_correct ? "border-l-green-500" : "border-l-red-500"}`}
-            >
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <CardTitle className="text-base flex items-center gap-2 mb-2">
-                      <span className="text-sm text-muted-foreground">Q{index + 1}.</span>
-                      <span className="text-balance">{answer.question.question_text}</span>
-                    </CardTitle>
-                    <div className="flex items-center gap-2 mb-2">
-                      <Badge variant="outline" className="text-xs">
-                        {getQuestionTypeLabel(answer.question.question_type)}
-                      </Badge>
-                      <span className="text-xs text-muted-foreground">
-                        Answered: {new Date(answer.answered_at).toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
-                  {answer.is_correct ? (
-                    <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
-                  ) : (
-                    <XCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent>
-                {/* MCQ Options Display */}
-                {answer.question.question_type === "mcq" && answer.question.options && (
-                  <div className="mb-4">
-                    <h4 className="font-medium text-sm text-muted-foreground mb-2">Options:</h4>
-                    <div className="grid grid-cols-1 gap-2">
-                      {Object.entries(answer.question.options).map(([key, value]) => (
-                        <div
-                          key={key}
-                          className={`p-2 rounded text-sm border ${
-                            key === answer.question.correct_answer
-                              ? "bg-green-50 border-green-200 text-green-800"
-                              : key === answer.user_answer
-                                ? "bg-red-50 border-red-200 text-red-800"
-                                : "bg-muted border-border"
-                          }`}
-                        >
-                          <strong>{key.toUpperCase()}.</strong> {value}
-                          {key === answer.question.correct_answer && (
-                            <span className="ml-2 text-xs font-medium">(Correct)</span>
-                          )}
-                          {key === answer.user_answer && key !== answer.question.correct_answer && (
-                            <span className="ml-2 text-xs font-medium">(User's Answer)</span>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Answer Details */}
-                <div className="space-y-3">
-                  <div>
-                    <h4 className="font-medium text-sm text-muted-foreground mb-1">User's Answer:</h4>
-                    <p className={`text-sm ${answer.is_correct ? "text-green-700" : "text-red-700"}`}>
-                      {answer.user_answer}
-                    </p>
-                  </div>
-
-                  {!answer.is_correct && (
-                    <div>
-                      <h4 className="font-medium text-sm text-muted-foreground mb-1">Correct Answer:</h4>
-                      <p className="text-sm text-green-700">{answer.question.correct_answer}</p>
-                    </div>
-                  )}
-
-                  <div>
-                    <h4 className="font-medium text-sm text-muted-foreground mb-1">Explanation:</h4>
-                    <p className="text-sm text-muted-foreground">{answer.question.explanation}</p>
-                  </div>
-                </div>
+          <h2 className="text-xl font-semibold text-foreground">
+            {attempt.completed_at ? "Question-by-Question Review" : "Answers So Far"}
+          </h2>
+          {userAnswers.length === 0 ? (
+            <Card>
+              <CardContent className="pt-6">
+                <p className="text-center text-muted-foreground">
+                  {attempt.completed_at ? "No answers recorded." : "User hasn't answered any questions yet."}
+                </p>
               </CardContent>
             </Card>
-          ))}
+          ) : (
+            userAnswers.map((answer, index) => (
+              <Card
+                key={answer.id}
+                className={`border-l-4 ${answer.is_correct ? "border-l-green-500" : "border-l-red-500"}`}
+              >
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <CardTitle className="text-base flex items-center gap-2 mb-2">
+                        <span className="text-sm text-muted-foreground">Q{index + 1}.</span>
+                        <span className="text-balance">{answer.question.question_text}</span>
+                      </CardTitle>
+                      <div className="flex items-center gap-2 mb-2">
+                        <Badge variant="outline" className="text-xs">
+                          {getQuestionTypeLabel(answer.question.question_type)}
+                        </Badge>
+                        <span className="text-xs text-muted-foreground">
+                          Answered: {new Date(answer.answered_at).toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+                    {answer.is_correct ? (
+                      <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
+                    ) : (
+                      <XCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {/* MCQ Options Display */}
+                  {answer.question.question_type === "mcq" && answer.question.options && (
+                    <div className="mb-4">
+                      <h4 className="font-medium text-sm text-muted-foreground mb-2">Options:</h4>
+                      <div className="grid grid-cols-1 gap-2">
+                        {Object.entries(answer.question.options).map(([key, value]) => (
+                          <div
+                            key={key}
+                            className={`p-2 rounded text-sm border ${
+                              key === answer.question.correct_answer
+                                ? "bg-green-50 border-green-200 text-green-800"
+                                : key === answer.user_answer
+                                  ? "bg-red-50 border-red-200 text-red-800"
+                                  : "bg-muted border-border"
+                            }`}
+                          >
+                            <strong>{key.toUpperCase()}.</strong> {value}
+                            {key === answer.question.correct_answer && (
+                              <span className="ml-2 text-xs font-medium">(Correct)</span>
+                            )}
+                            {key === answer.user_answer && key !== answer.question.correct_answer && (
+                              <span className="ml-2 text-xs font-medium">(User's Answer)</span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Answer Details */}
+                  <div className="space-y-3">
+                    <div>
+                      <h4 className="font-medium text-sm text-muted-foreground mb-1">User's Answer:</h4>
+                      <p className={`text-sm ${answer.is_correct ? "text-green-700" : "text-red-700"}`}>
+                        {answer.user_answer}
+                      </p>
+                    </div>
+
+                    {!answer.is_correct && (
+                      <div>
+                        <h4 className="font-medium text-sm text-muted-foreground mb-1">Correct Answer:</h4>
+                        <p className="text-sm text-green-700">{answer.question.correct_answer}</p>
+                      </div>
+                    )}
+
+                    <div>
+                      <h4 className="font-medium text-sm text-muted-foreground mb-1">Explanation:</h4>
+                      <p className="text-sm text-muted-foreground">{answer.question.explanation}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          )}
         </div>
 
         {/* Summary Stats */}
