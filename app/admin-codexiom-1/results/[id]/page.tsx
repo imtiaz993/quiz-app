@@ -18,6 +18,8 @@ interface QuizAttempt {
   completed_at: string | null
   total_score: number
   total_questions: number
+  mcq_score?: number
+  total_mcqs?: number
 }
 
 interface UserAnswer {
@@ -65,12 +67,12 @@ export default function ResultDetailPage({ params }: { params: Promise<{ id: str
 
       // Load user answers with question details
       const { data: answersData, error: answersError } = await supabase
-        .from("quiz_answers")
+        .from("user_answers")
         .select(`
           id,
           user_answer,
           is_correct,
-          created_at,
+          answered_at,
           questions (
             id,
             question_text,
@@ -81,7 +83,7 @@ export default function ResultDetailPage({ params }: { params: Promise<{ id: str
           )
         `)
         .eq("attempt_id", id)
-        .order("created_at")
+        .order("answered_at")
 
       if (answersError) throw answersError
 
@@ -91,7 +93,7 @@ export default function ResultDetailPage({ params }: { params: Promise<{ id: str
           id: item.id,
           user_answer: item.user_answer,
           is_correct: item.is_correct,
-          answered_at: item.created_at,
+          answered_at: item.answered_at,
           question: {
             id: (item.questions as any)?.id || "",
             question_text: (item.questions as any)?.question_text || "",
@@ -266,6 +268,60 @@ export default function ResultDetailPage({ params }: { params: Promise<{ id: str
           )}
         </Card>
 
+        {/* Performance Summary */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>Performance Summary</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+              <div>
+                <p className="text-2xl font-bold text-green-600">{attempt.total_score}</p>
+                <p className="text-sm text-muted-foreground">Correct</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-red-600">{attempt.total_questions - attempt.total_score}</p>
+                <p className="text-sm text-muted-foreground">Incorrect</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-foreground">{attempt.total_questions}</p>
+                <p className="text-sm text-muted-foreground">Total Questions</p>
+              </div>
+              <div>
+                <p
+                  className={`text-2xl font-bold ${percentage >= 80 ? "text-green-600" : percentage >= 60 ? "text-yellow-600" : "text-red-600"}`}
+                >
+                  {percentage}%
+                </p>
+                <p className="text-sm text-muted-foreground">Accuracy</p>
+              </div>
+            </div>
+            
+            {/* MCQ-specific stats if available */}
+            {attempt.mcq_score !== undefined && attempt.total_mcqs !== undefined && attempt.total_mcqs > 0 && (
+              <div className="mt-6 pt-6 border-t">
+                <h4 className="font-medium text-sm text-muted-foreground mb-3">MCQ Performance</h4>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-center">
+                  <div>
+                    <p className="text-xl font-bold text-blue-600">{attempt.mcq_score}</p>
+                    <p className="text-sm text-muted-foreground">MCQ Correct</p>
+                  </div>
+                  <div>
+                    <p className="text-xl font-bold text-foreground">{attempt.total_mcqs}</p>
+                    <p className="text-sm text-muted-foreground">Total MCQs</p>
+                  </div>
+                  <div>
+                    <p className="text-xl font-bold text-blue-600">
+                      {Math.round((attempt.mcq_score / attempt.total_mcqs) * 100)}%
+                    </p>
+                    <p className="text-sm text-muted-foreground">MCQ Accuracy</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Detailed Answers */}
         <div className="space-y-6">
           <h2 className="text-xl font-semibold text-foreground">
@@ -288,6 +344,10 @@ export default function ResultDetailPage({ params }: { params: Promise<{ id: str
                     ? answer.is_correct
                       ? "border-l-green-500"
                       : "border-l-red-500"
+                    : answer.question.question_type === "fill_blank"
+                    ? answer.is_correct
+                      ? "border-l-green-500"
+                      : "border-l-red-500"
                     : "border-l-gray-400"
                 }`}
               >
@@ -307,7 +367,7 @@ export default function ResultDetailPage({ params }: { params: Promise<{ id: str
                         </span>
                       </div>
                     </div>
-                    {answer.question.question_type === "mcq" ? (
+                    {answer.question.question_type === "mcq" || answer.question.question_type === "fill_blank" ? (
                       answer.is_correct ? (
                         <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
                       ) : (
@@ -354,7 +414,7 @@ export default function ResultDetailPage({ params }: { params: Promise<{ id: str
                       <h4 className="font-medium text-sm text-muted-foreground mb-1">User's Answer:</h4>
                       <p
                         className={`text-sm ${
-                          answer.question.question_type === "mcq"
+                          answer.question.question_type === "mcq" || answer.question.question_type === "fill_blank"
                             ? answer.is_correct
                               ? "text-green-700"
                               : "text-red-700"
@@ -365,7 +425,7 @@ export default function ResultDetailPage({ params }: { params: Promise<{ id: str
                       </p>
                     </div>
 
-                    {answer.question.question_type === "mcq" && !answer.is_correct && (
+                    {(answer.question.question_type === "mcq" || answer.question.question_type === "fill_blank") && !answer.is_correct && (
                       <div>
                         <h4 className="font-medium text-sm text-muted-foreground mb-1">Correct Answer:</h4>
                         <p className="text-sm text-green-700">{answer.question.correct_answer}</p>
@@ -383,36 +443,6 @@ export default function ResultDetailPage({ params }: { params: Promise<{ id: str
           )}
         </div>
 
-        {/* Summary Stats */}
-        <Card className="mt-8">
-          <CardHeader>
-            <CardTitle>Performance Summary</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-              <div>
-                <p className="text-2xl font-bold text-green-600">{attempt.total_score}</p>
-                <p className="text-sm text-muted-foreground">Correct</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-red-600">{attempt.total_questions - attempt.total_score}</p>
-                <p className="text-sm text-muted-foreground">Incorrect</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-foreground">{attempt.total_questions}</p>
-                <p className="text-sm text-muted-foreground">Total Questions</p>
-              </div>
-              <div>
-                <p
-                  className={`text-2xl font-bold ${percentage >= 80 ? "text-green-600" : percentage >= 60 ? "text-yellow-600" : "text-red-600"}`}
-                >
-                  {percentage}%
-                </p>
-                <p className="text-sm text-muted-foreground">Accuracy</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </main>
     </div>
   )

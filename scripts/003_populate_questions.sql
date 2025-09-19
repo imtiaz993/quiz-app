@@ -15,11 +15,11 @@ INSERT INTO skills (name, description) VALUES
 -- JavaScript & ES6 Questions (50)
 INSERT INTO questions (skill_id, question_text, question_type, options, correct_answer, explanation, variant) VALUES
 -- MCQs
-((SELECT id FROM skills WHERE name = 'JavaScript & ES6'), 'Which of the following is not a JavaScript data type?', 'mcq', '["Boolean", "Undefined", "Float", "Symbol"]', 'Float', 'JavaScript has Boolean, Undefined, and Symbol as data types, but not Float. Numbers are just "number" type.', 1),
-((SELECT id FROM skills WHERE name = 'JavaScript & ES6'), 'What does the Array.prototype.map() method return?', 'mcq', '["A modified original array", "A new array", "An object", "Undefined"]', 'A new array', 'map() always returns a new array without modifying the original.', 1),
-((SELECT id FROM skills WHERE name = 'JavaScript & ES6'), 'Which keyword is used to declare a block-scoped variable?', 'mcq', '["var", "let", "const", "Both b & c"]', 'Both b & c', 'Both let and const create block-scoped variables, unlike var which is function-scoped.', 1),
-((SELECT id FROM skills WHERE name = 'JavaScript & ES6'), 'What is the output of: console.log(typeof NaN);', 'mcq', '["undefined", "NaN", "number", "object"]', 'number', 'NaN (Not a Number) is actually of type "number" in JavaScript.', 1),
-((SELECT id FROM skills WHERE name = 'JavaScript & ES6'), 'Which method is used to merge two arrays in ES6?', 'mcq', '["concat()", "push()", "merge()", "append()"]', 'concat()', 'concat() method is used to merge arrays, though spread operator [...arr1, ...arr2] is also common in ES6.', 1),
+((SELECT id FROM skills WHERE name = 'JavaScript & ES6'), 'Which of the following is not a JavaScript data type?', 'mcq', '{"a": "Boolean", "b": "Undefined", "c": "Float", "d": "Symbol"}', 'c', 'JavaScript has Boolean, Undefined, and Symbol as data types, but not Float. Numbers are just "number" type.', 1),
+((SELECT id FROM skills WHERE name = 'JavaScript & ES6'), 'What does the Array.prototype.map() method return?', 'mcq', '{"a": "A modified original array", "b": "A new array", "c": "An object", "d": "Undefined"}', 'b', 'map() always returns a new array without modifying the original.', 1),
+((SELECT id FROM skills WHERE name = 'JavaScript & ES6'), 'Which keyword is used to declare a block-scoped variable?', 'mcq', '{"a": "var", "b": "let", "c": "const", "d": "Both b & c"}', 'd', 'Both let and const create block-scoped variables, unlike var which is function-scoped.', 1),
+((SELECT id FROM skills WHERE name = 'JavaScript & ES6'), 'What is the output of: console.log(typeof NaN);', 'mcq', '{"a": "undefined", "b": "NaN", "c": "number", "d": "object"}', 'c', 'NaN (Not a Number) is actually of type "number" in JavaScript.', 1),
+((SELECT id FROM skills WHERE name = 'JavaScript & ES6'), 'Which method is used to merge two arrays in ES6?', 'mcq', '{"a": "concat()", "b": "push()", "c": "merge()", "d": "append()"}', 'a', 'concat() method is used to merge arrays, though spread operator [...arr1, ...arr2] is also common in ES6.', 1),
 
 -- Fill in the blanks
 ((SELECT id FROM skills WHERE name = 'JavaScript & ES6'), 'The _______ keyword is used to import functions or components from another file in ES6.', 'fill_blank', '[]', 'import', 'The import keyword is used for ES6 module imports.', 1),
@@ -33,10 +33,10 @@ INSERT INTO questions (skill_id, question_text, question_type, options, correct_
 -- React Questions (50)
 INSERT INTO questions (skill_id, question_text, question_type, options, correct_answer, explanation, variant) VALUES
 -- MCQs
-((SELECT id FROM skills WHERE name = 'React'), 'What is React primarily used for?', 'mcq', '["Backend APIs", "Database management", "Building user interfaces", "Server configuration"]', 'Building user interfaces', 'React is a JavaScript library for building user interfaces.', 1),
-((SELECT id FROM skills WHERE name = 'React'), 'JSX is a syntax extension of:', 'mcq', '["HTML", "JavaScript", "XML", "CSS"]', 'JavaScript', 'JSX is a syntax extension of JavaScript that looks like HTML.', 1),
-((SELECT id FROM skills WHERE name = 'React'), 'Which of the following is used to manage state in functional components?', 'mcq', '["useEffect", "useState", "useMemo", "useCallback"]', 'useState', 'useState hook is used to manage state in functional components.', 1),
-((SELECT id FROM skills WHERE name = 'React'), 'Which lifecycle method is called after the component mounts in a class component?', 'mcq', '["componentDidMount", "componentWillMount", "componentDidUpdate", "componentWillUnmount"]', 'componentDidMount', 'componentDidMount is called after the component is mounted to the DOM.', 1),
+((SELECT id FROM skills WHERE name = 'React'), 'What is React primarily used for?', 'mcq', '{"a": "Backend APIs", "b": "Database management", "c": "Building user interfaces", "d": "Server configuration"}', 'c', 'React is a JavaScript library for building user interfaces.', 1),
+((SELECT id FROM skills WHERE name = 'React'), 'JSX is a syntax extension of:', 'mcq', '{"a": "HTML", "b": "JavaScript", "c": "XML", "d": "CSS"}', 'b', 'JSX is a syntax extension of JavaScript that looks like HTML.', 1),
+((SELECT id FROM skills WHERE name = 'React'), 'Which of the following is used to manage state in functional components?', 'mcq', '{"a": "useEffect", "b": "useState", "c": "useMemo", "d": "useCallback"}', 'b', 'useState hook is used to manage state in functional components.', 1),
+((SELECT id FROM skills WHERE name = 'React'), 'Which lifecycle method is called after the component mounts in a class component?', 'mcq', '{"a": "componentDidMount", "b": "componentWillMount", "c": "componentDidUpdate", "d": "componentWillUnmount"}', 'a', 'componentDidMount is called after the component is mounted to the DOM.', 1),
 
 -- Fill in the blanks
 ((SELECT id FROM skills WHERE name = 'React'), 'In React, data flows in a _______ direction.', 'fill_blank', '[]', 'unidirectional', 'React follows unidirectional data flow from parent to child.', 1),
@@ -49,9 +49,9 @@ INSERT INTO questions (skill_id, question_text, question_type, options, correct_
 -- Next.js 14 Questions (25)
 INSERT INTO questions (skill_id, question_text, question_type, options, correct_answer, explanation, variant) VALUES
 -- MCQs
-((SELECT id FROM skills WHERE name = 'Next.js 14'), 'What is the default type of component in Next.js 14 App Router?', 'mcq', '["Client component", "Server component", "Static component", "Dynamic component"]', 'Server component', 'Server components are the default in Next.js 14 App Router.', 1),
-((SELECT id FROM skills WHERE name = 'Next.js 14'), 'Which folder is required for the App Router in Next.js 14?', 'mcq', '["/pages", "/routes", "/app", "/src"]', '/app', 'The app directory is required for App Router in Next.js 14.', 1),
-((SELECT id FROM skills WHERE name = 'Next.js 14'), 'How do you mark a component as a client component in Next.js 14?', 'mcq', '["export const client = true;", "use client directive at the top", "Adding client: true in package.json", "Wrapping it in <ClientOnly>"]', 'use client directive at the top', 'Use "use client" directive at the top of the file.', 1),
+((SELECT id FROM skills WHERE name = 'Next.js 14'), 'What is the default type of component in Next.js 14 App Router?', 'mcq', '{"a": "Client component", "b": "Server component", "c": "Static component", "d": "Dynamic component"}', 'b', 'Server components are the default in Next.js 14 App Router.', 1),
+((SELECT id FROM skills WHERE name = 'Next.js 14'), 'Which folder is required for the App Router in Next.js 14?', 'mcq', '{"a": "/pages", "b": "/routes", "c": "/app", "d": "/src"}', 'c', 'The app directory is required for App Router in Next.js 14.', 1),
+((SELECT id FROM skills WHERE name = 'Next.js 14'), 'How do you mark a component as a client component in Next.js 14?', 'mcq', '{"a": "export const client = true;", "b": "use client directive at the top", "c": "Adding client: true in package.json", "d": "Wrapping it in <ClientOnly>"}', 'b', 'Use "use client" directive at the top of the file.', 1),
 
 -- Fill in the blanks
 ((SELECT id FROM skills WHERE name = 'Next.js 14'), 'In App Router, server components are the default because they are _______ and _______.', 'fill_blank', '[]', 'faster, SEO-friendly', 'Server components improve performance and SEO.', 1),
@@ -64,9 +64,9 @@ INSERT INTO questions (skill_id, question_text, question_type, options, correct_
 -- TypeScript Questions (25)
 INSERT INTO questions (skill_id, question_text, question_type, options, correct_answer, explanation, variant) VALUES
 -- MCQs
-((SELECT id FROM skills WHERE name = 'TypeScript'), 'What does TypeScript add on top of JavaScript?', 'mcq', '["Runtime type checking", "Static type checking", "Faster execution", "Direct database access"]', 'Static type checking', 'TypeScript adds static type checking at compile time.', 1),
-((SELECT id FROM skills WHERE name = 'TypeScript'), 'Which file extension is used for TypeScript files?', 'mcq', '[".js", ".ts", ".tsx", "Both b & c"]', 'Both b & c', 'TypeScript uses .ts for regular files and .tsx for JSX files.', 1),
-((SELECT id FROM skills WHERE name = 'TypeScript'), 'Which keyword is used to define a custom type in TypeScript?', 'mcq', '["type", "typedef", "struct", "alias"]', 'type', 'The type keyword is used to create type aliases in TypeScript.', 1),
+((SELECT id FROM skills WHERE name = 'TypeScript'), 'What does TypeScript add on top of JavaScript?', 'mcq', '{"a": "Runtime type checking", "b": "Static type checking", "c": "Faster execution", "d": "Direct database access"}', 'b', 'TypeScript adds static type checking at compile time.', 1),
+((SELECT id FROM skills WHERE name = 'TypeScript'), 'Which file extension is used for TypeScript files?', 'mcq', '{"a": ".js", "b": ".ts", "c": ".tsx", "d": "Both b & c"}', 'd', 'TypeScript uses .ts for regular files and .tsx for JSX files.', 1),
+((SELECT id FROM skills WHERE name = 'TypeScript'), 'Which keyword is used to define a custom type in TypeScript?', 'mcq', '{"a": "type", "b": "typedef", "c": "struct", "d": "alias"}', 'a', 'The type keyword is used to create type aliases in TypeScript.', 1),
 
 -- Fill in the blanks
 ((SELECT id FROM skills WHERE name = 'TypeScript'), 'TypeScript is developed and maintained by _______.', 'fill_blank', '[]', 'Microsoft', 'TypeScript is developed by Microsoft.', 1),
@@ -79,9 +79,9 @@ INSERT INTO questions (skill_id, question_text, question_type, options, correct_
 -- Redux Questions (20)
 INSERT INTO questions (skill_id, question_text, question_type, options, correct_answer, explanation, variant) VALUES
 -- MCQs
-((SELECT id FROM skills WHERE name = 'Redux'), 'In Redux, the state is:', 'mcq', '["Mutable", "Immutable", "Both mutable and immutable", "None of the above"]', 'Immutable', 'Redux state should always be immutable for predictable updates.', 1),
-((SELECT id FROM skills WHERE name = 'Redux'), 'What is the main purpose of reducers in Redux?', 'mcq', '["To fetch API data", "To update state based on actions", "To render UI", "To dispatch actions"]', 'To update state based on actions', 'Reducers specify how state changes in response to actions.', 1),
-((SELECT id FROM skills WHERE name = 'Redux'), 'Which middleware is commonly used for handling asynchronous actions in Redux?', 'mcq', '["redux-thunk", "redux-async", "redux-delay", "redux-fetch"]', 'redux-thunk', 'Redux Thunk allows action creators to return functions for async operations.', 1),
+((SELECT id FROM skills WHERE name = 'Redux'), 'In Redux, the state is:', 'mcq', '{"a": "Mutable", "b": "Immutable", "c": "Both mutable and immutable", "d": "None of the above"}', 'b', 'Redux state should always be immutable for predictable updates.', 1),
+((SELECT id FROM skills WHERE name = 'Redux'), 'What is the main purpose of reducers in Redux?', 'mcq', '{"a": "To fetch API data", "b": "To update state based on actions", "c": "To render UI", "d": "To dispatch actions"}', 'b', 'Reducers specify how state changes in response to actions.', 1),
+((SELECT id FROM skills WHERE name = 'Redux'), 'Which middleware is commonly used for handling asynchronous actions in Redux?', 'mcq', '{"a": "redux-thunk", "b": "redux-async", "c": "redux-delay", "d": "redux-fetch"}', 'a', 'Redux Thunk allows action creators to return functions for async operations.', 1),
 
 -- Fill in the blanks
 ((SELECT id FROM skills WHERE name = 'Redux'), 'In Redux, actions must always have a ______ property.', 'fill_blank', '[]', 'type', 'Every Redux action must have a type property.', 1),
@@ -94,9 +94,9 @@ INSERT INTO questions (skill_id, question_text, question_type, options, correct_
 -- CSS & Tailwind Questions (20)
 INSERT INTO questions (skill_id, question_text, question_type, options, correct_answer, explanation, variant) VALUES
 -- MCQs
-((SELECT id FROM skills WHERE name = 'CSS & Tailwind'), 'Which CSS property is used to change the stacking order of elements?', 'mcq', '["position", "display", "z-index", "float"]', 'z-index', 'z-index controls the stacking order of positioned elements.', 1),
-((SELECT id FROM skills WHERE name = 'CSS & Tailwind'), 'Which of the following is NOT a valid position value in CSS?', 'mcq', '["sticky", "relative", "fixed", "static-inline"]', 'static-inline', 'static-inline is not a valid CSS position value.', 1),
-((SELECT id FROM skills WHERE name = 'CSS & Tailwind'), 'In Tailwind, which class is used for applying margin on all sides?', 'mcq', '["m", "mx", "my", "p"]', 'm', 'The m class applies margin on all sides in Tailwind.', 1),
+((SELECT id FROM skills WHERE name = 'CSS & Tailwind'), 'Which CSS property is used to change the stacking order of elements?', 'mcq', '{"a": "position", "b": "display", "c": "z-index", "d": "float"}', 'c', 'z-index controls the stacking order of positioned elements.', 1),
+((SELECT id FROM skills WHERE name = 'CSS & Tailwind'), 'Which of the following is NOT a valid position value in CSS?', 'mcq', '{"a": "sticky", "b": "relative", "c": "fixed", "d": "static-inline"}', 'd', 'static-inline is not a valid CSS position value.', 1),
+((SELECT id FROM skills WHERE name = 'CSS & Tailwind'), 'In Tailwind, which class is used for applying margin on all sides?', 'mcq', '{"a": "m", "b": "mx", "c": "my", "d": "p"}', 'a', 'The m class applies margin on all sides in Tailwind.', 1),
 
 -- Fill in the blanks
 ((SELECT id FROM skills WHERE name = 'CSS & Tailwind'), 'In CSS Grid, the property used to define rows is ______.', 'fill_blank', '[]', 'grid-template-rows', 'grid-template-rows defines the size of grid rows.', 1),
@@ -109,9 +109,9 @@ INSERT INTO questions (skill_id, question_text, question_type, options, correct_
 -- Git & Workflow Questions (10)
 INSERT INTO questions (skill_id, question_text, question_type, options, correct_answer, explanation, variant) VALUES
 -- MCQs
-((SELECT id FROM skills WHERE name = 'Git & Workflow'), 'Which command is used to create a new branch in Git?', 'mcq', '["git checkout -b branch-name", "git branch checkout branch-name", "git create branch branch-name", "git switch branch branch-name"]', 'git checkout -b branch-name', 'git checkout -b creates and switches to a new branch.', 1),
-((SELECT id FROM skills WHERE name = 'Git & Workflow'), 'What does git stash do?', 'mcq', '["Saves changes and commits them", "Temporarily stores changes without committing", "Deletes untracked files", "Switches to another branch"]', 'Temporarily stores changes without committing', 'git stash temporarily saves uncommitted changes.', 1),
-((SELECT id FROM skills WHERE name = 'Git & Workflow'), 'Which command is used to update your local branch with the latest changes from the remote repository?', 'mcq', '["git fetch", "git pull", "git merge", "git push"]', 'git pull', 'git pull fetches and merges changes from remote repository.', 1),
+((SELECT id FROM skills WHERE name = 'Git & Workflow'), 'Which command is used to create a new branch in Git?', 'mcq', '{"a": "git checkout -b branch-name", "b": "git branch checkout branch-name", "c": "git create branch branch-name", "d": "git switch branch branch-name"}', 'a', 'git checkout -b creates and switches to a new branch.', 1),
+((SELECT id FROM skills WHERE name = 'Git & Workflow'), 'What does git stash do?', 'mcq', '{"a": "Saves changes and commits them", "b": "Temporarily stores changes without committing", "c": "Deletes untracked files", "d": "Switches to another branch"}', 'b', 'git stash temporarily saves uncommitted changes.', 1),
+((SELECT id FROM skills WHERE name = 'Git & Workflow'), 'Which command is used to update your local branch with the latest changes from the remote repository?', 'mcq', '{"a": "git fetch", "b": "git pull", "c": "git merge", "d": "git push"}', 'b', 'git pull fetches and merges changes from remote repository.', 1),
 
 -- Fill in the blanks
 ((SELECT id FROM skills WHERE name = 'Git & Workflow'), 'The command git ______ is used to upload commits to a remote repository.', 'fill_blank', '[]', 'push', 'git push uploads local commits to remote repository.', 1),

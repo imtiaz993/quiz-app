@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -37,6 +37,7 @@ export function QuizInterface({ userInfo, onComplete }: QuizInterfaceProps) {
   const [variant, setVariant] = useState<number>(1)
   const [timeLeft, setTimeLeft] = useState(1200) // Changed timer to 20 minutes (1200 seconds)
   const [isTimeUp, setIsTimeUp] = useState(false)
+  const hasAttemptBeenCreated = useRef(false)
 
   useEffect(() => {
     loadQuestions()
@@ -59,6 +60,14 @@ export function QuizInterface({ userInfo, onComplete }: QuizInterfaceProps) {
   }
 
   const loadQuestions = async () => {
+    // Prevent multiple attempts from being created
+    if (hasAttemptBeenCreated.current) {
+      console.log("Attempt already created for this component instance, skipping...")
+      return
+    }
+
+    hasAttemptBeenCreated.current = true
+    
     try {
       const supabase = createClient()
 
@@ -133,28 +142,66 @@ export function QuizInterface({ userInfo, onComplete }: QuizInterfaceProps) {
 
       console.log("[v0] Final selected questions:", selectedQuestions.length)
 
-      const { data: attemptData, error: attemptError } = await supabase
+      // Check if there's already an incomplete attempt for this user
+      console.log("Checking for existing attempts for email:", userInfo.email)
+      const { data: allIncompleteAttempts, error: existingError } = await supabase
         .from("quiz_attempts")
-        .insert({
-          user_name: userInfo.name,
-          user_email: userInfo.email,
-          user_info: {
-            currentSalary: userInfo.currentSalary,
-            expectedSalary: userInfo.expectedSalary,
-            reasonForLeaving: userInfo.reasonForLeaving,
-            reactExperience: userInfo.reactExperience,
-            additionalInfo: userInfo.additionalInfo || null,
-          },
-          variant: selectedVariant,
-          total_questions: selectedQuestions.length,
-        })
-        .select()
-        .single()
+        .select("id, completed_at, started_at")
+        .eq("user_email", userInfo.email)
+        .is("completed_at", null)
+        .order("started_at", { ascending: false })
 
-      if (attemptError) throw attemptError
+      console.log("All incomplete attempts for user:", allIncompleteAttempts)
+
+      // If there are multiple incomplete attempts, delete the older ones
+      if (allIncompleteAttempts && allIncompleteAttempts.length > 1) {
+        console.log(`Found ${allIncompleteAttempts.length} incomplete attempts, cleaning up...`)
+        const attemptsToDelete = allIncompleteAttempts.slice(1) // Keep the most recent one
+        for (const attempt of attemptsToDelete) {
+          console.log("Deleting old incomplete attempt:", attempt.id)
+          await supabase.from("quiz_attempts").delete().eq("id", attempt.id)
+        }
+      }
+
+      const existingAttempt = allIncompleteAttempts && allIncompleteAttempts.length > 0 ? allIncompleteAttempts[0] : null
+
+      let currentAttemptId
+
+      if (existingAttempt && !existingError) {
+        // Use existing incomplete attempt
+        currentAttemptId = existingAttempt.id
+        console.log("Using existing incomplete attempt:", currentAttemptId)
+      } else {
+        // Create new attempt
+        console.log("No existing attempt found, creating new one for:", userInfo.email)
+        const { data: attemptData, error: attemptError } = await supabase
+          .from("quiz_attempts")
+          .insert({
+            user_name: userInfo.name,
+            user_email: userInfo.email,
+            user_info: {
+              currentSalary: userInfo.currentSalary,
+              expectedSalary: userInfo.expectedSalary,
+              reasonForLeaving: userInfo.reasonForLeaving,
+              reactExperience: userInfo.reactExperience,
+              additionalInfo: userInfo.additionalInfo || null,
+            },
+            variant: selectedVariant,
+            total_questions: selectedQuestions.length,
+          })
+          .select()
+          .single()
+
+        if (attemptError) {
+          console.error("Error creating new attempt:", attemptError)
+          throw attemptError
+        }
+        currentAttemptId = attemptData.id
+        console.log("Created new attempt:", currentAttemptId)
+      }
 
       setQuestions(selectedQuestions)
-      setAttemptId(attemptData.id)
+      setAttemptId(currentAttemptId)
     } catch (error) {
       console.error("[v0] Error loading questions:", error)
       setQuestions([])
@@ -178,7 +225,7 @@ export function QuizInterface({ userInfo, onComplete }: QuizInterfaceProps) {
 
       const correct = checkAnswer(currentQuestion, userAnswer)
 
-      await supabase.from("quiz_answers").insert({
+      await supabase.from("user_answers").insert({
         attempt_id: attemptId,
         question_id: currentQuestion.id,
         user_answer: userAnswer,
@@ -221,7 +268,7 @@ export function QuizInterface({ userInfo, onComplete }: QuizInterfaceProps) {
       const supabase = createClient()
 
       const { data: answersData } = await supabase
-        .from("quiz_answers")
+        .from("user_answers")
         .select(`
           is_correct,
           questions!inner(question_type)
@@ -230,20 +277,52 @@ export function QuizInterface({ userInfo, onComplete }: QuizInterfaceProps) {
 
       const totalScore = answersData?.filter((answer) => answer.is_correct).length || 0
 
-      const mcqAnswers = answersData?.filter((answer) => answer.questions.question_type === "mcq") || []
+      const mcqAnswers = answersData?.filter((answer) => (answer.questions as any)?.question_type === "mcq") || []
       const mcqCorrect = mcqAnswers.filter((answer) => answer.is_correct).length
       const totalMcqs = mcqAnswers.length
       const textualQuestions = questions.filter((q) => q.question_type !== "mcq").length
 
-      await supabase
+      // First, try to update with all fields
+      let updateData: any = {
+        completed_at: new Date().toISOString(),
+        total_score: totalScore,
+        mcq_score: mcqCorrect,
+        total_mcqs: totalMcqs,
+      }
+
+      let { error: updateError } = await supabase
         .from("quiz_attempts")
-        .update({
+        .update(updateData)
+        .eq("id", attemptId)
+
+      // If the update fails (likely due to missing MCQ fields), try without them
+      if (updateError) {
+        console.warn("First update failed, trying without MCQ fields:", updateError)
+        updateData = {
           completed_at: new Date().toISOString(),
           total_score: totalScore,
-          mcq_score: mcqCorrect,
-          total_mcqs: totalMcqs,
-        })
-        .eq("id", attemptId)
+        }
+        
+        const { error: retryError } = await supabase
+          .from("quiz_attempts")
+          .update(updateData)
+          .eq("id", attemptId)
+        
+        updateError = retryError
+      }
+
+      if (updateError) {
+        console.error("Error updating quiz attempt:", updateError)
+        throw updateError
+      }
+
+      console.log("Quiz attempt updated successfully:", {
+        attemptId,
+        completed_at: new Date().toISOString(),
+        total_score: totalScore,
+        mcq_score: mcqCorrect,
+        total_mcqs: totalMcqs,
+      })
 
       onComplete({
         id: attemptId,

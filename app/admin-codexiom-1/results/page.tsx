@@ -20,6 +20,8 @@ interface QuizAttempt {
   completed_at: string | null
   total_score: number
   total_questions: number
+  mcq_score?: number
+  total_mcqs?: number
 }
 
 export default function ResultsPage() {
@@ -53,6 +55,8 @@ export default function ResultsPage() {
       const { data, error } = await supabase.from("quiz_attempts").select("*").order("started_at", { ascending: false })
 
       if (error) throw error
+      
+      console.log("Loaded quiz attempts:", data)
       setAttempts(data || [])
     } catch (error) {
       console.error("Error loading results:", error)
@@ -123,8 +127,8 @@ export default function ResultsPage() {
     try {
       const supabase = createClient()
 
-      // Delete quiz answers first (foreign key constraint)
-      const { error: answersError } = await supabase.from("quiz_answers").delete().eq("attempt_id", attemptId)
+      // Delete user answers first (foreign key constraint)
+      const { error: answersError } = await supabase.from("user_answers").delete().eq("attempt_id", attemptId)
 
       if (answersError) throw answersError
 
