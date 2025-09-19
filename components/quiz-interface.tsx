@@ -35,7 +35,7 @@ export function QuizInterface({ userInfo, onComplete }: QuizInterfaceProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [attemptId, setAttemptId] = useState<string>("")
   const [variant, setVariant] = useState<number>(1)
-  const [timeLeft, setTimeLeft] = useState(1800)
+  const [timeLeft, setTimeLeft] = useState(1200) // Changed timer to 20 minutes (1200 seconds)
   const [isTimeUp, setIsTimeUp] = useState(false)
 
   useEffect(() => {
@@ -122,7 +122,14 @@ export function QuizInterface({ userInfo, onComplete }: QuizInterfaceProps) {
         selectedQuestions.push(...shuffled.slice(0, Math.min(questionsToTake, skillQuestions.length)))
       })
 
-      selectedQuestions = selectedQuestions.sort(() => Math.random() - 0.5)
+      const mcqQuestions = selectedQuestions.filter((q) => q.question_type === "mcq")
+      const otherQuestions = selectedQuestions.filter((q) => q.question_type !== "mcq")
+
+      // Shuffle MCQs
+      const shuffledMcqs = [...mcqQuestions].sort(() => Math.random() - 0.5)
+
+      // Combine: MCQs first, then other questions
+      selectedQuestions = [...shuffledMcqs, ...otherQuestions]
 
       console.log("[v0] Final selected questions:", selectedQuestions.length)
 
@@ -135,6 +142,7 @@ export function QuizInterface({ userInfo, onComplete }: QuizInterfaceProps) {
             currentSalary: userInfo.currentSalary,
             expectedSalary: userInfo.expectedSalary,
             reasonForLeaving: userInfo.reasonForLeaving,
+            reactExperience: userInfo.reactExperience,
             additionalInfo: userInfo.additionalInfo || null,
           },
           variant: selectedVariant,
@@ -170,7 +178,7 @@ export function QuizInterface({ userInfo, onComplete }: QuizInterfaceProps) {
 
       const correct = checkAnswer(currentQuestion, userAnswer)
 
-      await supabase.from("user_answers").insert({
+      await supabase.from("quiz_answers").insert({
         attempt_id: attemptId,
         question_id: currentQuestion.id,
         user_answer: userAnswer,
@@ -213,7 +221,7 @@ export function QuizInterface({ userInfo, onComplete }: QuizInterfaceProps) {
       const supabase = createClient()
 
       const { data: answersData } = await supabase
-        .from("user_answers")
+        .from("quiz_answers")
         .select(`
           is_correct,
           questions!inner(question_type)
@@ -303,7 +311,7 @@ export function QuizInterface({ userInfo, onComplete }: QuizInterfaceProps) {
         {/* Progress Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-2xl font-bold text-foreground">Quiz - Variant {variant}</h1>
+            <h1 className="text-2xl font-bold text-foreground">Quiz Assessment</h1>
             <span className="text-sm text-muted-foreground">
               Question {currentQuestionIndex + 1} of {questions.length}
             </span>

@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import type { UserInfo } from "@/app/quiz/page"
 import { BookOpen } from "lucide-react"
 
@@ -22,6 +23,7 @@ export function UserRegistration({ onComplete }: UserRegistrationProps) {
     currentSalary: "",
     expectedSalary: "",
     reasonForLeaving: "",
+    reactExperience: "", // Added React experience field
   })
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -51,6 +53,10 @@ export function UserRegistration({ onComplete }: UserRegistrationProps) {
       newErrors.reasonForLeaving = "Reason for switching/leaving is required"
     }
 
+    if (!formData.reactExperience.trim()) {
+      newErrors.reactExperience = "React experience is required"
+    }
+
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -71,6 +77,7 @@ export function UserRegistration({ onComplete }: UserRegistrationProps) {
       currentSalary: formData.currentSalary.trim(),
       expectedSalary: formData.expectedSalary.trim(),
       reasonForLeaving: formData.reasonForLeaving.trim(),
+      reactExperience: formData.reactExperience.trim(), // Added React experience to form data
     })
 
     setIsLoading(false)
@@ -143,6 +150,26 @@ export function UserRegistration({ onComplete }: UserRegistrationProps) {
                   className={errors.expectedSalary ? "border-destructive" : ""}
                 />
                 {errors.expectedSalary && <p className="text-sm text-destructive">{errors.expectedSalary}</p>}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="reactExperience">React Experience *</Label>
+                <Select
+                  value={formData.reactExperience}
+                  onValueChange={(value) => setFormData((prev) => ({ ...prev, reactExperience: value }))}
+                >
+                  <SelectTrigger className={errors.reactExperience ? "border-destructive" : ""}>
+                    <SelectValue placeholder="Select your React experience level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="No Professional Experience">No Professional Experience</SelectItem>
+                    <SelectItem value="3+ Months">3+ Months</SelectItem>
+                    <SelectItem value="6+ Months">6+ Months</SelectItem>
+                    <SelectItem value="1 Year">1 Year</SelectItem>
+                    <SelectItem value="1-2 Years">1-2 Years</SelectItem>
+                  </SelectContent>
+                </Select>
+                {errors.reactExperience && <p className="text-sm text-destructive">{errors.reactExperience}</p>}
               </div>
 
               <div className="space-y-2">

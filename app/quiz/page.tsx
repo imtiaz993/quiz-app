@@ -11,6 +11,7 @@ export type UserInfo = {
   currentSalary: string
   expectedSalary: string
   reasonForLeaving: string
+  reactExperience: string // Added React experience field
 }
 
 export type QuizAttempt = {

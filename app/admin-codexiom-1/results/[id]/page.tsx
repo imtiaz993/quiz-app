@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { createClient } from "@/lib/supabase/client"
-import { ArrowLeft, CheckCircle, XCircle, User, Calendar, Target } from "lucide-react"
+import { ArrowLeft, CheckCircle, XCircle, User, Calendar, Target, Minus } from "lucide-react"
 
 interface QuizAttempt {
   id: string
@@ -65,12 +65,12 @@ export default function ResultDetailPage({ params }: { params: Promise<{ id: str
 
       // Load user answers with question details
       const { data: answersData, error: answersError } = await supabase
-        .from("user_answers")
+        .from("quiz_answers")
         .select(`
           id,
           user_answer,
           is_correct,
-          answered_at,
+          created_at,
           questions (
             id,
             question_text,
@@ -81,7 +81,7 @@ export default function ResultDetailPage({ params }: { params: Promise<{ id: str
           )
         `)
         .eq("attempt_id", id)
-        .order("answered_at")
+        .order("created_at")
 
       if (answersError) throw answersError
 
@@ -91,7 +91,7 @@ export default function ResultDetailPage({ params }: { params: Promise<{ id: str
           id: item.id,
           user_answer: item.user_answer,
           is_correct: item.is_correct,
-          answered_at: item.answered_at,
+          answered_at: item.created_at,
           question: {
             id: (item.questions as any)?.id || "",
             question_text: (item.questions as any)?.question_text || "",
@@ -243,6 +243,12 @@ export default function ResultDetailPage({ params }: { params: Promise<{ id: str
                     <p className="text-sm">{attempt.user_info.expectedSalary}</p>
                   </div>
                 )}
+                {attempt.user_info.reactExperience && (
+                  <div>
+                    <h4 className="font-medium text-sm text-muted-foreground mb-1">React Experience:</h4>
+                    <p className="text-sm">{attempt.user_info.reactExperience}</p>
+                  </div>
+                )}
                 {attempt.user_info.reasonForLeaving && (
                   <div className="md:col-span-2">
                     <h4 className="font-medium text-sm text-muted-foreground mb-1">Reason for Switching/Leaving:</h4>
@@ -277,7 +283,13 @@ export default function ResultDetailPage({ params }: { params: Promise<{ id: str
             userAnswers.map((answer, index) => (
               <Card
                 key={answer.id}
-                className={`border-l-4 ${answer.is_correct ? "border-l-green-500" : "border-l-red-500"}`}
+                className={`border-l-4 ${
+                  answer.question.question_type === "mcq"
+                    ? answer.is_correct
+                      ? "border-l-green-500"
+                      : "border-l-red-500"
+                    : "border-l-gray-400"
+                }`}
               >
                 <CardHeader>
                   <div className="flex items-start justify-between">
@@ -295,10 +307,14 @@ export default function ResultDetailPage({ params }: { params: Promise<{ id: str
                         </span>
                       </div>
                     </div>
-                    {answer.is_correct ? (
-                      <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
+                    {answer.question.question_type === "mcq" ? (
+                      answer.is_correct ? (
+                        <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
+                      ) : (
+                        <XCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
+                      )
                     ) : (
-                      <XCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
+                      <Minus className="h-5 w-5 text-gray-400 flex-shrink-0" />
                     )}
                   </div>
                 </CardHeader>
@@ -336,12 +352,20 @@ export default function ResultDetailPage({ params }: { params: Promise<{ id: str
                   <div className="space-y-3">
                     <div>
                       <h4 className="font-medium text-sm text-muted-foreground mb-1">User's Answer:</h4>
-                      <p className={`text-sm ${answer.is_correct ? "text-green-700" : "text-red-700"}`}>
+                      <p
+                        className={`text-sm ${
+                          answer.question.question_type === "mcq"
+                            ? answer.is_correct
+                              ? "text-green-700"
+                              : "text-red-700"
+                            : "text-foreground"
+                        }`}
+                      >
                         {answer.user_answer}
                       </p>
                     </div>
 
-                    {!answer.is_correct && (
+                    {answer.question.question_type === "mcq" && !answer.is_correct && (
                       <div>
                         <h4 className="font-medium text-sm text-muted-foreground mb-1">Correct Answer:</h4>
                         <p className="text-sm text-green-700">{answer.question.correct_answer}</p>

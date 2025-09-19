@@ -8,7 +8,8 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { createClient } from "@/lib/supabase/client"
-import { ArrowLeft, Search, Eye, Calendar, Users, TrendingUp } from "lucide-react"
+import { ArrowLeft, Search, Eye, Calendar, Users, TrendingUp, Trash2 } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
 
 interface QuizAttempt {
   id: string
@@ -25,6 +26,7 @@ export default function ResultsPage() {
   const [attempts, setAttempts] = useState<QuizAttempt[]>([])
   const [filteredAttempts, setFilteredAttempts] = useState<QuizAttempt[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
   const [filterVariant, setFilterVariant] = useState<string>("all")
   const [filterStatus, setFilterStatus] = useState<string>("all")
@@ -34,6 +36,7 @@ export default function ResultsPage() {
     averageScore: 0,
     uniqueUsers: 0,
   })
+  const { toast } = useToast()
 
   useEffect(() => {
     loadResults()
@@ -109,6 +112,44 @@ export default function ResultsPage() {
     if (percentage >= 80) return "default"
     if (percentage >= 60) return "secondary"
     return "destructive"
+  }
+
+  const deleteAttempt = async (attemptId: string, userName: string) => {
+    if (!confirm(`Are you sure you want to delete the test attempt by ${userName}? This action cannot be undone.`)) {
+      return
+    }
+
+    setDeletingId(attemptId)
+    try {
+      const supabase = createClient()
+
+      // Delete quiz answers first (foreign key constraint)
+      const { error: answersError } = await supabase.from("quiz_answers").delete().eq("attempt_id", attemptId)
+
+      if (answersError) throw answersError
+
+      // Delete the quiz attempt
+      const { error: attemptError } = await supabase.from("quiz_attempts").delete().eq("id", attemptId)
+
+      if (attemptError) throw attemptError
+
+      // Update local state
+      setAttempts((prev) => prev.filter((attempt) => attempt.id !== attemptId))
+
+      toast({
+        title: "Success",
+        description: `Test attempt by ${userName} has been deleted.`,
+      })
+    } catch (error) {
+      console.error("Error deleting attempt:", error)
+      toast({
+        title: "Error",
+        description: "Failed to delete test attempt. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setDeletingId(null)
+    }
   }
 
   if (isLoading) {
@@ -275,6 +316,16 @@ export default function ResultsPage() {
                           View Details
                         </Button>
                       </Link>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => deleteAttempt(attempt.id, attempt.user_name)}
+                        disabled={deletingId === attempt.id}
+                        className="text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        {deletingId === attempt.id ? "Deleting..." : "Delete"}
+                      </Button>
                     </div>
                   </div>
                 </CardHeader>

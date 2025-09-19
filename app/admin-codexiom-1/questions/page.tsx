@@ -369,7 +369,7 @@ export default function QuestionsPage() {
                       value={jsonInput}
                       onChange={(e) => setJsonInput(e.target.value)}
                       rows={15}
-                      className="font-mono text-sm"
+                      className="font-mono text-sm h-[100px]"
                     />
                   </div>
                   <DialogFooter>
