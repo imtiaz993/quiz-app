@@ -10,7 +10,7 @@ type AppGateProps = {
   children: React.ReactNode
 }
 
-const ACCESS_PASSWORD = "790106885299"
+const ACCESS_PASSWORD = "5710"
 
 export function AppGate({ children }: AppGateProps) {
   const [isAuthorized, setIsAuthorized] = useState(false)

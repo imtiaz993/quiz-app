@@ -388,12 +388,15 @@ export function QuizInterface({ userInfo, onComplete }: QuizInterfaceProps) {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-2xl font-bold text-foreground">Quiz Assessment</h1>
+            <span className="text-sm text-muted-foreground">
+              Question {currentQuestionIndex + 1} of {questions.length}
+            </span>
           </div>
           <Progress value={progress} className="h-2" />
         </div>
 
         {/* Question Card */}
-        <Card className="mb-6">
+       <Card className="mb-6 select-none">
           <CardHeader>
             <CardTitle className="text-xl text-balance">{currentQuestion.question_text}</CardTitle>
           </CardHeader>
