@@ -388,9 +388,6 @@ export function QuizInterface({ userInfo, onComplete }: QuizInterfaceProps) {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-2xl font-bold text-foreground">Quiz Assessment</h1>
-            <span className="text-sm text-muted-foreground">
-              Question {currentQuestionIndex + 1} of {questions.length}
-            </span>
           </div>
           <Progress value={progress} className="h-2" />
         </div>
