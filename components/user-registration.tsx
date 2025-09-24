@@ -20,9 +20,7 @@ export function UserRegistration({ onComplete }: UserRegistrationProps) {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    currentSalary: "",
-    expectedSalary: "",
-    reasonForLeaving: "",
+    additionalInfo: "",
     reactExperience: "", // Added React experience field
   })
   const [isLoading, setIsLoading] = useState(false)
@@ -41,17 +39,7 @@ export function UserRegistration({ onComplete }: UserRegistrationProps) {
       newErrors.email = "Please enter a valid email address"
     }
 
-    if (!formData.currentSalary.trim()) {
-      newErrors.currentSalary = "Current/Previous salary is required"
-    }
-
-    if (!formData.expectedSalary.trim()) {
-      newErrors.expectedSalary = "Expected salary is required"
-    }
-
-    if (!formData.reasonForLeaving.trim()) {
-      newErrors.reasonForLeaving = "Reason for switching/leaving is required"
-    }
+    // additionalInfo is optional
 
     if (!formData.reactExperience.trim()) {
       newErrors.reactExperience = "React experience is required"
@@ -74,9 +62,7 @@ export function UserRegistration({ onComplete }: UserRegistrationProps) {
     onComplete({
       name: formData.name.trim(),
       email: formData.email.trim(),
-      currentSalary: formData.currentSalary.trim(),
-      expectedSalary: formData.expectedSalary.trim(),
-      reasonForLeaving: formData.reasonForLeaving.trim(),
+      additionalInfo: formData.additionalInfo.trim() || undefined,
       reactExperience: formData.reactExperience.trim(), // Added React experience to form data
     })
 
@@ -125,32 +111,7 @@ export function UserRegistration({ onComplete }: UserRegistrationProps) {
                 {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="currentSalary">Current/Previous Salary *</Label>
-                <Input
-                  id="currentSalary"
-                  type="text"
-                  placeholder="Enter your current or previous salary"
-                  value={formData.currentSalary}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, currentSalary: e.target.value }))}
-                  className={errors.currentSalary ? "border-destructive" : ""}
-                />
-                <p className="text-xs text-muted-foreground">Slip will be required at the time of joining</p>
-                {errors.currentSalary && <p className="text-sm text-destructive">{errors.currentSalary}</p>}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="expectedSalary">Expected Salary *</Label>
-                <Input
-                  id="expectedSalary"
-                  type="text"
-                  placeholder="Enter your expected salary"
-                  value={formData.expectedSalary}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, expectedSalary: e.target.value }))}
-                  className={errors.expectedSalary ? "border-destructive" : ""}
-                />
-                {errors.expectedSalary && <p className="text-sm text-destructive">{errors.expectedSalary}</p>}
-              </div>
+              {/* Salary fields removed as requested */}
 
               <div className="space-y-2">
                 <Label htmlFor="reactExperience">React Experience *</Label>
@@ -173,16 +134,14 @@ export function UserRegistration({ onComplete }: UserRegistrationProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="reasonForLeaving">Reason for Switching/Leaving Last Job *</Label>
+                <Label htmlFor="additionalInfo">Anything you'd like to share (optional)</Label>
                 <Textarea
-                  id="reasonForLeaving"
-                  placeholder="Please explain your reason for switching or leaving your last job..."
-                  value={formData.reasonForLeaving}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, reasonForLeaving: e.target.value }))}
+                  id="additionalInfo"
+                  placeholder="Share anything you'd like us to know about you or your goals..."
+                  value={formData.additionalInfo}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, additionalInfo: e.target.value }))}
                   rows={3}
-                  className={errors.reasonForLeaving ? "border-destructive" : ""}
                 />
-                {errors.reasonForLeaving && <p className="text-sm text-destructive">{errors.reasonForLeaving}</p>}
               </div>
 
               <Button type="submit" className="w-full" disabled={isLoading}>

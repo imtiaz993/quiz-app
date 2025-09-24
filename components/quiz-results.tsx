@@ -23,6 +23,7 @@ export function QuizResults({ attempt, userInfo }: QuizResultsProps) {
   const totalMcqs = attempt.totalMcqs || 0
   const textualQuestions = attempt.textualQuestions || 0
   const mcqPercentage = totalMcqs > 0 ? Math.round((mcqScore / totalMcqs) * 100) : 0
+  const isEligible = mcqPercentage >= 75
 
   const getScoreColor = (score: number, total: number) => {
     const percentage = (score / total) * 100
@@ -87,6 +88,12 @@ export function QuizResults({ attempt, userInfo }: QuizResultsProps) {
                 <p className={`text-2xl font-bold ${getScoreColor(mcqScore, totalMcqs)}`}>{mcqPercentage}%</p>
                 <p className="text-sm text-muted-foreground">MCQ Accuracy</p>
               </div>
+            </div>
+            <div className="mt-4 text-center">
+              <p className="text-2xl font-medium text-foreground">75% accuracy of MCQs is required to become eligible for the next step.</p>
+              {!isEligible && (
+                <p className="text-xl text-destructive mt-1">You didn't qualify for the next step. Please aim for at least 75%.</p>
+              )}
             </div>
           </CardContent>
         </Card>

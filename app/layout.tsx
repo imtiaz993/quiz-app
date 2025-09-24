@@ -3,6 +3,7 @@ import { GeistSans } from 'geist/font/sans'
 import { GeistMono } from 'geist/font/mono'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
+import { AppGate } from '@/components/app-gate'
 
 export const metadata: Metadata = {
   title: 'Codexiom Skill Test',
@@ -18,7 +19,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
-        {children}
+        <AppGate>{children}</AppGate>
         <Analytics />
       </body>
     </html>

@@ -8,11 +8,8 @@ import { QuizResults } from "@/components/quiz-results"
 export type UserInfo = {
   name: string
   email: string
-  currentSalary: string
-  expectedSalary: string
-  reasonForLeaving: string
-  reactExperience: string // Added React experience field
   additionalInfo?: string // Optional additional information
+  reactExperience: string // Added React experience field
 }
 
 export type QuizAttempt = {

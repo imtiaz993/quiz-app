@@ -180,9 +180,6 @@ export function QuizInterface({ userInfo, onComplete }: QuizInterfaceProps) {
             user_name: userInfo.name,
             user_email: userInfo.email,
             user_info: {
-              currentSalary: userInfo.currentSalary,
-              expectedSalary: userInfo.expectedSalary,
-              reasonForLeaving: userInfo.reasonForLeaving,
               reactExperience: userInfo.reactExperience,
               additionalInfo: userInfo.additionalInfo || null,
             },
